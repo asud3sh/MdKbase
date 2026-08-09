@@ -1,4 +1,3 @@
--
 - दैनिक | क्षितिजमा
 	- [[Core/Action]]
 	- [[Core/Learning]]
