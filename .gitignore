@@ -3,3 +3,6 @@ journals/*
 
 # app related files
 logseq/*
+
+# Exclude RKI.md file
+RKI.md
