@@ -1,0 +1,15 @@
+- **Language**
+- [[Clang]]
+- [[Rust]]
+- [[Python]]
+- Database
+- [[Postgres]]
+- [[Redis]]
+- **WebDev**
+- [[HTML5]]
+- [[CSS3]]
+- [[TypeScript]]
+- **VCS**
+- [[Git]]
+- **OS**
+- [[Linux]]

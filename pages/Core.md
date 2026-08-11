@@ -8,4 +8,3 @@
 	- [[Core/Archive]]
 - धारणा | विचारहरू
 	- [[Core/Journal]]
-	- [[Core/Ide-Oughts]]
