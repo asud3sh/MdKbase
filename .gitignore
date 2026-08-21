@@ -4,5 +4,5 @@ journals/*
 # app related files
 logseq/*
 
-# Exclude RKI.md file
-RKI.md
+# Exclude imark.md file
+imark.md
