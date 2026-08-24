@@ -767,7 +767,7 @@
 			- The self-signature proves the terminal holds the private key (proof of possession). The CA validates this before issuing a certificate.
 		- A.4 — TMS rki-module Submits CSR to CryptoHub Issuing CA (Channel 3)
 		  collapsed:: true
-			- TMS rki-module submits the terminal's PKCS#10 CSR to the CryptoHub Issuing CA over
+			- TMS rki-module submits the terminal's `PKCS#10` CSR to the CryptoHub Issuing CA over
 			- **Channel 3 (REST/TLS)**:
 			  collapsed:: true
 				- ```
@@ -905,10 +905,10 @@
 				  | `AO` | 4 | Alphabetic | `PEDI` | Yes |
 				  | `VS` | 1 | Numeric | `3` | Yes |
 				  | `MD` | 1 | Numeric | `2` | Yes |
-				  | `CD` | 1–16000 | Base64 or Hex | Terminal's PKCS#7 or X.509 device encryption cert | Yes |
+				  | `CD` | 1–16000 | Base64 or Hex | Terminal's `PKCS#7` or X.509 device encryption cert | Yes |
 				  | `YA`–`YI` | 1–16000 | Base64 or Hex | Additional certs for validating `CD` | Optional |
 				  | `DG` | 1–128 | ASCII | Device group name | Optional |
-				  | `RF` | 1 | Numeric | `0`=X.509 only; `1`=full PKCS#7 chain (excl. root) | Optional |
+				  | `RF` | 1 | Numeric | `0`=X.509 only; `1`=full `PKCS#7` chain (excl. root) | Optional |
 				  | `TD` | 1–2 | Numeric | `1`–`10` (default `1`); chain depth (only if `RF=1`) | Optional |
 			- **PEDI Response Tokens (verified from documentation):**
 			  collapsed:: true
@@ -948,7 +948,7 @@
 				- |Field | Value | Verified meaning |
 				  |---|---|---|
 				  | `AN` | `Y` | Device found, certs verified, keys available |
-				  | `CC` | `3082042706092A864886...` | RKMS signing cert (PKCS#7 chain, hex DER) — relay to terminal |
+				  | `CC` | `3082042706092A864886...` | RKMS signing cert (`PKCS#7` chain, hex DER) — relay to terminal |
 				  | `RD` | `FD09FDB6841265CF60C390B139DBCE90` | 16-byte RKMS nonce — **retain for PEDK `KA`** |
 			- **30-second clock starts NOW.**
 		- B.6 — PEDK: Key Request (Channel 2)
@@ -961,7 +961,7 @@
 			  | `AO` | 4 | Alphabetic | `PEDK` | Yes |
 			  | `VS` | 1 | Numeric | `3` | Yes |
 			  | `MD` | 1 | Numeric | `2` | Yes |
-			  | `CE` | 1 | Numeric | `1`=PKCS#1 v1.5 (default); `2`=PSS | Optional |
+			  | `CE` | 1 | Numeric | `1`=`PKCS#1 v1.5` (default); `2`=PSS | Optional |
 			  | `SA` | Variable | Numeric | Salt length; defaults to hash length | Optional (PSS only) |
 			- **PEDK Response Tokens (verified from documentation):**
 			  
@@ -999,7 +999,7 @@
 				  | `DG` | `v3-m2-ch_BasicSplit` | Device group confirmed |
 				  | `KN` | `5` | 5 remaining keys |
 				  | `RG` | `1` | SHA-256 |
-				  | `CE` | `1` | PKCS#1 v1.5 |
+				  | `CE` | `1` | ``PKCS#1 v1.5` |
 				  | `AP` | `308205C9...` | TR-34 blob — relay to terminal |
 				  | `KA` | `063D192E...` | RKMS signature over VS+MD+AN+DG+KN+AP+RG+CE+SA+RD |
 		- B.7 — TMS Delivers Key Block to Terminal (Channel 1)
@@ -1032,7 +1032,7 @@
 				  | `MD` | 1 | Numeric | `1` (default) | Optional |
 				  | `KV` | Variable | Hexadecimal | Key Verification ASN.1 structure | Yes |
 				  | `KA` | 1–1024 | Hexadecimal | Terminal RSA signature | Yes |
-				  | `CE` | 1 | Numeric | `1`=PKCS#1 v1.5; `2`=PSS | Optional |
+				  | `CE` | 1 | Numeric | `1`=; `2`=PSS | Optional |
 				  | `SA` | Variable | Numeric | Salt length | Optional (PSS only) |
 				  | `RD` | 1–8 or 32 | Hexadecimal | Device-generated nonce | Yes |
 			- **Terminal `KA` signs:** `KV + device nonce (RD) + RKMS nonce (RD from PEDI) + CE + SA`
@@ -1470,7 +1470,7 @@
 				- State machine representation with enums
 				- Certificate serialization to hex
 				- SHA-256 nonce signing
-				- Signature format — PKCS#1 v1.5
+				- Signature format — `PKCS#1 v1.5`
 				- Session ID tracking
 			- **Exercise:** Implement `RklgPki`. Test the two-step flow with a mock nonce.
 		- Day 14: PEDI — Identification Request
@@ -1528,15 +1528,15 @@
 		  collapsed:: true
 			- **Rust Concepts:** `rsa` crate, `sha2`, DER encoding, cryptographic randomness
 			- **RKI Component:** `crypto/keypair.rs`, `crypto/csr.rs`
-			- **Protocol Context:** Terminal generates RSA keypair on-device. Public key exported in PKCS#10 CSR. Private key never leaves terminal.
+			- **Protocol Context:** Terminal generates RSA keypair on-device. Public key exported in `PKCS#10` CSR. Private key never leaves terminal.
 			- **Key Topics:**
 				- RSA keypair generation (2048-bit)
 				- RSA public/private key types
-				- PKCS#10 CSR structure
+				- `PKCS#10` CSR structure
 				- Subject DN construction (CN=serial)
 				- Self-signature for proof of possession
 				- DER encoding
-			- **Exercise:** Generate RSA keypair and create PKCS#10 CSR. Verify CSR signature.
+			- **Exercise:** Generate RSA keypair and create `PKCS#10` CSR. Verify CSR signature.
 		- Day 18: CA Integration — CSR Submission
 		  collapsed:: true
 			- **Rust Concepts:** REST refinement, retry logic, UUID handling, async reqwest
@@ -1964,3 +1964,589 @@
 		  
 		  ---
 - RKI CORE MODULE : A Journey
+	- Day 1 : Ownership, Borrowing, and Project Genesis
+		- Rust exists because of a fundamental tension in systems programming: we want both **performance** (no garbage collector) and **safety** (no memory bugs). C and C++ give you performance but require manual memory management — leading to use-after-free, double-free, buffer overflows, and data races. Java and Python give you safety through garbage collection but at the cost of unpredictable latency and overhead.
+		- Rust resolves this tension with **ownership** — a compile-time system that proves memory safety without runtime cost. This is not a minor feature. This is the heart of the language. Everything else — borrowing, lifetimes, traits, async — builds upon ownership.
+		- collapsed:: true
+		  1. RECALL
+			- This is Day 1. There is nothing to recall from Rust. But recall this from own experience: every program manages data. Data lives in memory. Memory must be allocated and freed. The question is: *who is responsible for freeing it?*
+			- In C: the programmer (manual `malloc`/`free`)
+			- In Java: the garbage collector (automatic, but unpredictable)
+			- In Rust: the compiler (automatic, at compile time, with zero runtime cost)
+			- This is the promise of Rust. Today we learn how it keeps that promise.
+		- collapsed:: true
+		  2. THEORETICAL FOUNDATION
+			- The Stack and the Heap
+			  collapsed:: true
+				- Before we can understand ownership, we must understand where data lives.
+				  
+				  **The Stack:** A LIFO (last-in, first-out) data structure. Every function call pushes a stack frame. Every return pops it. Stack allocation is fast — it's just a pointer increment. Stack data has a known, fixed size at compile time.
+				  
+				  **The Heap:** A pool of memory accessible from anywhere. Allocation requires finding free space (slower). Deallocation requires returning that space (complex). Heap data can have unknown or dynamic size.
+				  
+				  Consider our RKI module. A device certificate is a few kilobytes. It could be stack-allocated if we knew its exact size at compile time. But certificates vary in size — they contain variable-length fields. We need the heap.
+			- The Ownership Rules
+			  collapsed:: true
+				- Rust's ownership system is defined by three rules:
+				  
+				  1. **Each value in Rust has exactly one owner.**
+				  2. **When the owner goes out of scope, the value is dropped (freed).**
+				  3. **Ownership can be transferred (moved), but there is always exactly one owner at any time.**
+				  
+				  These rules are enforced at compile time. When you violate them, the compiler refuses to compile your code. This means memory bugs are *impossible* in safe Rust — not just unlikely, but mathematically impossible.
+			- Why This Matters for RKI Core
+			  collapsed:: true
+				- Our module handles payment key material. A key must never be copied accidentally. A key must never outlive its intended scope. A key must never be freed twice. Ownership gives us these guarantees *for free*.
+				  
+				  When we store a key in a struct, that struct owns the key. When the struct is dropped, the key is dropped. If we want to share the key, we must explicitly borrow it — and the compiler ensures the borrow does not outlive the owner.
+				  
+				  This is why Rust is the right language for payment security. The compiler enforces what auditors can only review.
+		- collapsed:: true
+		  3. PROTOCOL CONTEXT
+			- Where Ownership Appears in RKL v3 Mode 2
+			  collapsed:: true
+				- Throughout our module, we will encounter ownership in three critical places:
+				  
+				  **1. Key Material:** The TR-34 blob (AP token in PEDK) contains encrypted keys. When we receive it from CryptoHub, we own it. We pass it to the terminal. We never copy it. We never store it. Ownership makes this explicit.
+				  
+				  **2. Configuration:** The `RkiConfig` struct holds TLS paths, host addresses, and timeout values. It is created at startup, borrowed throughout the program's lifetime, and dropped at shutdown. There is exactly one configuration.
+				  
+				  **3. Sessions:** The `RkiSession` holds the JWT from RKLG. It is created during authentication, borrowed during the ceremony, and dropped when the session expires. There is exactly one active session per connection.
+			- The Structure We Are Building Today
+			  collapsed:: true
+				- Today we create the project skeleton. We define:
+				  
+				  ```
+				  rki-core/
+				  ├── Cargo.toml           # Project manifest
+				  ├── src/
+				  │   ├── lib.rs           # Library entry point — public API
+				  │   ├── main.rs          # Binary entry point — CLI
+				  │   ├── error.rs         # Error types (stub for now)
+				  │   └── config.rs        # Configuration types (stub for now)
+				  ```
+				  
+				  The `Cargo.toml` declares our dependencies. The `lib.rs` defines our public interface. The `main.rs` is the CLI frontend. The `error.rs` and `config.rs` are stubs we will fill in Days 2 and 5.
+				- Today's Focus on `lib.rs` — the public API of our library. We learn:
+					- How to define a struct
+					- How to implement methods on a struct
+					- How ownership applies to struct fields
+					- How `String` differs from `&str`
+					  
+					  ---
+		- collapsed:: true
+		  4. RUST IMPLEMENTATION
+			- Step 1: Create the Project
+			  collapsed:: true
+				- ```bash
+				  cargo new rki-core --lib
+				  cd rki-core
+				  ```
+				- This creates:
+				  collapsed:: true
+					- ```
+					  rki-core/
+					  ├── Cargo.toml
+					  ├── src/
+					  │   └── lib.rs
+					  ```
+				- The `Cargo.toml`:
+				  collapsed:: true
+					- ```toml
+					  [package]
+					  name = "rki-core"
+					  version = "0.1.0"
+					  edition = "2021"
+					  - [dependencies]
+					  ```
+				- The `lib.rs` (default):
+				  collapsed:: true
+					- ```rust
+					  pub fn add(left: u64, right: u64) -> u64 {
+					  left + right
+					  }
+					  - #[cfg(test)]
+					  mod tests {
+					  use super::*;
+					  - #[test]
+					  fn it_works() {
+					      let result = add(2, 2);
+					      assert_eq!(result, 4);
+					  }
+					  }
+					  ```
+				- This is our starting point. Now let us transform it.
+			- Step 2: Define a Configuration Struct
+			  collapsed:: true
+				- ❌ NAIVE APPROACH: A beginner might write:
+				  collapsed:: true
+					- ```rust
+					  pub struct RkiConfig {
+					    cryptohub_host: String,
+					    cryptohub_port: u16,
+					    terminal_port: u16,
+					    ca_url: String,
+					  }
+					  ```
+				- This compiles. But it has problems:
+				  collapsed:: true
+					- Fields are private — external code cannot read them
+					- No way to construct it from outside the module
+					- No validation
+					- No defaults
+				- COMPILER ERROR (When We Try to Use It)
+				  collapsed:: true
+					- ```rust
+					  fn main() {
+					    let config = RkiConfig {
+					        cryptohub_host: "localhost".to_string(),
+					        cryptohub_port: 9000,
+					        terminal_port: 8443,
+					        ca_url: "https://localhost/api/v2".to_string(),
+					    };
+					    // Error: cannot construct RkiConfig because fields are private
+					  }
+					  ```
+					- Actually, this compiles if we're in the same module. But in `main.rs`, it fails:
+					- ```
+					  error[E0451]: field `cryptohub_host` of struct `RkiConfig` is private
+					  ```
+				- ✅ FIXED VERSION
+				  collapsed:: true
+					- ```rust
+					  // src/lib.rs
+					  
+					  /// Configuration for the RKI Core module.
+					  ///
+					  /// This struct owns all configuration strings. It is created once at
+					  /// startup and borrowed throughout the program's lifetime.
+					  #[derive(Debug, Clone)]
+					  pub struct RkiConfig {
+					    /// CryptoHub hostname or IP address
+					    pub cryptohub_host: String,
+					    /// CryptoHub Host API port (default: 9000)
+					    pub cryptohub_port: u16,
+					    /// Terminal channel listener port (default: 8443)
+					    pub terminal_port: u16,
+					    /// CryptoHub CA REST API base URL
+					    pub ca_url: String,
+					  }
+					  
+					  impl RkiConfig {
+					    /// Create a new RkiConfig with validation.
+					    pub fn new(
+					        cryptohub_host: String,
+					        cryptohub_port: u16,
+					        terminal_port: u16,
+					        ca_url: String,
+					    ) -> Result<Self, ConfigError> {
+					        // Validate port numbers
+					        if cryptohub_port == 0 {
+					            return Err(ConfigError::InvalidPort("cryptohub_port cannot be zero".into()));
+					        }
+					        if terminal_port == 0 {
+					            return Err(ConfigError::InvalidPort("terminal_port cannot be zero".into()));
+					        }
+					          // Validate URL starts with https
+					          if !ca_url.starts_with("https://") {
+					            return Err(ConfigError::InvalidUrl("ca_url must start with https://".into()));
+					        }
+					        Ok(Self {
+					            cryptohub_host,
+					            cryptohub_port,
+					            terminal_port,
+					            ca_url,
+					        })
+					    }
+					  
+					    /// Get the full CryptoHub Host API address.
+					    pub fn cryptohub_address(&self) -> String {
+					        format!("{}:{}", self.cryptohub_host, self.cryptohub_port)
+					    }
+					  }
+					  ```
+				- 📚 EXPLANATION
+				  collapsed:: true
+					- **Ownership in Action:** The `RkiConfig` struct *owns* its strings. When `RkiConfig` is dropped, the `String` fields are dropped automatically. No manual memory management.
+					  
+					  **`String` vs `&str`:** A `String` is an owned, heap-allocated, growable string. A `&str` is a borrowed slice — a view into a string owned by someone else. Our config *owns* its strings because it must outlive the functions that use it.
+					  
+					  **`&self` in methods:** The `cryptohub_address()` method borrows `self` — it takes a `&self` reference. This means it can read fields but cannot modify them. The borrow ends when the method returns.
+					  
+					  **The `Result` return:** `new()` returns `Result<Self, ConfigError>` because validation can fail. This is our first encounter with `Result` — we will explore it fully on Day 2.
+			- Step 3: Define a Simple Error Type (Stub)
+			  collapsed:: true
+				- For the above to compile, we need a `ConfigError` type. Let's create a minimal stub:
+				  collapsed:: true
+					- ```rust
+					  // src/error.rs
+					  
+					  /// Error type for configuration errors.
+					  #[derive(Debug)]
+					  pub enum ConfigError {
+					    /// A port number is invalid (zero or out of range)
+					    InvalidPort(String),
+					    /// A URL is invalid
+					    InvalidUrl(String),
+					  }
+					  
+					  impl std::fmt::Display for ConfigError {
+					    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+					        match self {
+					            ConfigError::InvalidPort(msg) => write!(f, "Invalid port: {}", msg),
+					            ConfigError::InvalidUrl(msg) => write!(f, "Invalid URL: {}", msg),
+					        }
+					    }
+					  }
+					  
+					  impl std::error::Error for ConfigError {}
+					  ```
+					  
+					  And in `lib.rs`, we re-export it:
+					  
+					  ```rust
+					  mod error;
+					  
+					  pub use error::ConfigError;
+					  ```
+				- 📚 EXPLANATION
+				  collapsed:: true
+					- We've created our first **enum** — `ConfigError`. Enums in Rust can hold data (unlike simple C enums). We'll explore this fully on Day 2.
+					  
+					  For now, note that `ConfigError::InvalidPort(String)` holds a `String` — the error message. This is an *owned* value. When the error is dropped, the message is freed.
+			- Step 4: Create the Library Entry Point
+			  collapsed:: true
+				- ```rust
+				  // src/lib.rs
+				  
+				  pub mod error;
+				  
+				  pub use error::ConfigError;
+				  
+				  /// Configuration for the RKI Core module.
+				  #[derive(Debug, Clone)]
+				  pub struct RkiConfig {
+				    pub cryptohub_host: String,
+				    pub cryptohub_port: u16,
+				    pub terminal_port: u16,
+				    pub ca_url: String,
+				  }
+				  
+				  impl RkiConfig {
+				    pub fn new(
+				        cryptohub_host: String,
+				        cryptohub_port: u16,
+				        terminal_port: u16,
+				        ca_url: String,
+				    ) -> Result<Self, ConfigError> {
+				        if cryptohub_port == 0 {
+				            return Err(ConfigError::InvalidPort("cryptohub_port cannot be zero".into()));
+				        }
+				        if terminal_port == 0 {
+				            return Err(ConfigError::InvalidPort("terminal_port cannot be zero".into()));
+				        }
+				        if !ca_url.starts_with("https://") {
+				            return Err(ConfigError::InvalidUrl("ca_url must start with https://".into()));
+				        }
+				        Ok(Self {
+				            cryptohub_host,
+				            cryptohub_port,
+				            terminal_port,
+				            ca_url,
+				        })
+				    }
+				  
+				    pub fn cryptohub_address(&self) -> String {
+				        format!("{}:{}", self.cryptohub_host, self.cryptohub_port)
+				    }
+				  }
+				  ```
+				  
+				  ---
+			- Step 5: Create the Binary Entry Point
+			  collapsed:: true
+				- ```rust
+				  // src/main.rs
+				  
+				  use rki_core::RkiConfig;
+				  
+				  fn main() {
+				    // Configuration is created here — main() owns it.
+				    let config = RkiConfig::new(
+				        "localhost".to_string(),
+				        9000,
+				        8443,
+				        "https://localhost/api/v2".to_string(),
+				    ).expect("Failed to create config");
+				  
+				    // Print the CryptoHub address.
+				    println!("CryptoHub address: {}", config.cryptohub_address());
+				  
+				    // When main() returns, config is dropped and its strings are freed.
+				  }
+				  ```
+				  
+				  But wait — our crate is a library (`cargo new --lib`). To have a binary, we need to add it. Let's modify `Cargo.toml`:
+				  
+				  ```toml
+				  [package]
+				  name = "rki-core"
+				  version = "0.1.0"
+				  edition = "2021"
+				  
+				  [dependencies]
+				  
+				  [lib]
+				  name = "rki_core"
+				  path = "src/lib.rs"
+				  
+				  [[bin]]
+				  name = "rki-core"
+				  path = "src/main.rs"
+				  ```
+				  
+				  Now we have both a library and a binary. The library is the public API. The binary is the CLI frontend.
+			- Step 6: Add Unit Tests
+			  collapsed:: true
+				- Rust has built-in test support. Let's add tests to `lib.rs`:
+				  
+				  ```rust
+				  #[cfg(test)]
+				  mod tests {
+				    use super::*;
+				  
+				    #[test]
+				    fn test_config_creation_valid() {
+				        let config = RkiConfig::new(
+				            "localhost".to_string(),
+				            9000,
+				            8443,
+				            "https://localhost/api/v2".to_string(),
+				        );
+				        assert!(config.is_ok());
+				        let config = config.unwrap();
+				        assert_eq!(config.cryptohub_host, "localhost");
+				        assert_eq!(config.cryptohub_port, 9000);
+				    }
+				  
+				    #[test]
+				    fn test_config_creation_invalid_port() {
+				        let config = RkiConfig::new(
+				            "localhost".to_string(),
+				            0,  // Invalid port
+				            8443,
+				            "https://localhost/api/v2".to_string(),
+				        );
+				        assert!(config.is_err());
+				    }
+				  
+				    #[test]
+				    fn test_config_creation_invalid_url() {
+				        let config = RkiConfig::new(
+				            "localhost".to_string(),
+				            9000,
+				            8443,
+				            "http://localhost/api/v2".to_string(),  // Not https
+				        );
+				        assert!(config.is_err());
+				    }
+				  
+				    #[test]
+				    fn test_cryptohub_address() {
+				        let config = RkiConfig::new(
+				            "cryptohub.example.com".to_string(),
+				            9000,
+				            8443,
+				            "https://cryptohub.example.com/api/v2".to_string(),
+				        ).unwrap();
+				        assert_eq!(config.cryptohub_address(), "cryptohub.example.com:9000");
+				    }
+				  }
+				  ```
+				  
+				  Run tests:
+				  
+				  ```bash
+				  cargo test
+				  ```
+				  
+				  All tests should pass.
+			- Step 7: Demonstrate Ownership in Action
+			  collapsed:: true
+				- Let's add a function that demonstrates ownership rules:
+				  collapsed:: true
+					- ```rust
+					  // src/lib.rs (continued)
+					  
+					  /// Demonstrates ownership transfer.
+					  ///
+					  /// This function takes ownership of a String and returns it.
+					  /// The caller loses ownership when calling this function.
+					  /// The caller regains ownership if it captures the return value.
+					  pub fn demonstrate_ownership_transfer(s: String) -> String {
+					    // s is owned by this function.
+					    // When this function returns, s would be dropped.
+					    // But we return it — ownership transfers to the caller.
+					    s
+					  }
+					  
+					  /// Demonstrates borrowing.
+					  ///
+					  /// This function borrows a String — it takes a &String reference.
+					  /// The caller retains ownership.
+					  /// The borrow ends when the function returns.
+					  pub fn demonstrate_borrowing(s: &String) -> usize {
+					    // s is borrowed here.
+					    // We can read s, but cannot modify it.
+					    s.len()
+					  }
+					  
+					  /// Demonstrates mutable borrowing.
+					  ///
+					  /// This function mutably borrows a String — it takes a &mut String.
+					  /// The caller retains ownership but cannot use the String during the borrow.
+					  pub fn demonstrate_mutable_borrowing(s: &mut String) {
+					    // s is mutably borrowed here.
+					    // We can modify s.
+					    s.push_str(" modified");
+					  }
+					  ```
+				- ❌ NAIVE APPROACH (That Won't Compile)
+				  collapsed:: true
+					- ```rust
+					  fn main() {
+					    let s = String::from("hello");
+					    
+					    // Try to use s after it's been moved.
+					    let s2 = demonstrate_ownership_transfer(s);
+					    println!("Original: {}", s);  // ERROR: s was moved!
+					    println!("New: {}", s2);
+					  }
+					  ```
+				- COMPILER ERROR
+				  collapsed:: true
+					- ```
+					  error[E0382]: borrow of moved value: `s`
+					  --> src/main.rs:5:31
+					   |
+					  3  |     let s = String::from("hello");
+					   |         - move occurs because `s` has type `String`, which does not implement the `Copy` trait
+					  4  |     let s2 = demonstrate_ownership_transfer(s);
+					   |                                             - value moved here
+					  5  |     println!("Original: {}", s);  // ERROR: s was moved!
+					   |                               ^ value borrowed here after move
+					  ```
+				- ✅ FIXED VERSION
+				  collapsed:: true
+					- ```rust
+					  fn main() {
+					    let s = String::from("hello");
+					    
+					    // Transfer ownership and capture the return.
+					    let s = demonstrate_ownership_transfer(s);
+					    println!("After transfer: {}", s);
+					    
+					    // Borrow immutably.
+					    let len = demonstrate_borrowing(&s);
+					    println!("Length: {}", len);
+					    
+					    // Borrow mutably.
+					    let mut s = s;  // s must be mutable to mutably borrow.
+					    demonstrate_mutable_borrowing(&mut s);
+					    println!("After mutable borrow: {}", s);
+					  }
+					  ```
+				- 📚 EXPLANATION
+				  collapsed:: true
+					- **Ownership transfer (move):** When we call `demonstrate_ownership_transfer(s)`, ownership of `s` moves into the function. The caller no longer owns `s`. If the function returns the string, ownership moves back to the caller (if captured). Otherwise, the string is dropped when the function returns.
+					  
+					  **Immutable borrow:** `&s` creates a shared reference. Multiple immutable borrows can exist simultaneously. The owner retains ownership and can still read `s`.
+					  
+					  **Mutable borrow:** `&mut s` creates an exclusive reference. Only one mutable borrow can exist at a time. The owner cannot use `s` while it is mutably borrowed — this prevents data races.
+					  
+					  These rules are enforced at **compile time**. There is no runtime cost. This is the genius of Rust.
+		- collapsed:: true
+		  5. RKI APPLICATION
+			- What We Built Today
+			  collapsed:: true
+				- We created the project skeleton for `rki-core`:
+				  collapsed:: true
+					- `Cargo.toml` — project manifest
+					- `src/lib.rs` — library entry point with `RkiConfig` struct
+					- `src/main.rs` — binary entry point (CLI)
+					- `src/error.rs` — stub `ConfigError` enum
+				- We learned:
+				  collapsed:: true
+					- Ownership rules apply to all data
+					- `String` owns its data; `&str` borrows
+					- Structs own their fields
+					- Methods can borrow `self` (`&self`) or take ownership (`self`)
+					- Validation returns `Result` — we'll explore this fully on Day 2
+				- What This Means for RKI Core
+				  collapsed:: true
+					- Every piece of data in our module will follow these rules:
+						- `RkiConfig` owns configuration strings
+						- `RkiSession` will own the JWT
+						- `Tr34Blob` will own the decoded key material
+						- `DeviceCert` will own the certificate bytes
+				- No key material will ever be accidentally copied. No configuration will ever be accidentally modified. No session will ever outlive its scope.
+				- This is the foundation of our security guarantee.
+		- collapsed:: true
+		  6. COMMON PITFALLS
+			- Pitfall 1: Confusing `String` and `&str`
+			  collapsed:: true
+				- **Why beginners make this mistake:** Both represent text. The difference is ownership.
+				- **How to detect:** If you're calling `.to_string()` everywhere, you might be over-allocating. If you're getting lifetime errors, you might be under-owning.
+				- **How to prevent:** Ask: "Who owns this string? Who should own it?" If the data must outlive the function, use `String`. If it's just borrowed for reading, use `&str`.
+			- Pitfall 2: Trying to Use a Value After Moving It
+			  collapsed:: true
+				- **Why beginners make this mistake:** Intuition from C++ where copying is implicit.
+				- **How to detect:** Compiler error "borrow of moved value."
+				- **How to prevent:** Pass by reference (`&T`) when you only need to read. Pass by value (move) only when you need ownership.
+			- Pitfall 3: Forgetting `mut` for Mutable Borrows
+			  collapsed:: true
+				- **Why beginners make this mistake:** The `mut` keyword applies to the *binding*, not the *type*.
+				- **How to detect:** Compiler error "cannot borrow as mutable."
+				- **How to prevent:** If you need to mutate a variable, declare it with `let mut`.
+			- Pitfall 4: Storing References in Structs
+			  collapsed:: true
+				- **Why beginners make this mistake:** Tempting to avoid ownership complexity.
+				- **How to detect:** Compiler error about lifetimes.
+				- **How to prevent:** For now, always store owned data (`String`, not `&str`) in structs. We'll learn lifetimes later.
+			- Pitfall 5: Ignoring `Result` Return Values
+			  collapsed:: true
+				- **Why beginners make this mistake:** Habit from languages where errors are exceptions.
+				- **How to detect:** Compiler warning about unused `Result`.
+				- **How to prevent:** Always handle `Result` — either with `?`, `match`, or `.expect()`. We'll cover this fully on Day 2.
+		- collapsed:: true
+		  7. EXERCISE
+			- Task 1: Extend the Config Struct
+			  collapsed:: true
+				- Add a `TlsConfig` struct that owns:
+					- `ca_cert_path: String`
+					- `tms_cert_path: String`
+					- `tms_key_path: String`
+				- Add it as a field in `RkiConfig`. Implement validation (paths must not be empty).
+				- **Success criteria:** `cargo test` passes with tests for valid and invalid TLS configs.
+			- Task 2: Implement a Simple Struct with Ownership
+			  collapsed:: true
+				- Create a `DeviceInfo` struct that owns:
+					- `serial_number: String`
+					- `certificate: Option<String>` (None if not yet issued)
+				- Implement methods:
+					- `has_certificate() -> bool`
+					- `set_certificate(cert: String)` — takes ownership of cert
+				- **Success criteria:** Demonstrate ownership transfer works correctly.
+			- Task 3 (Stretch Goal): Implement `Drop` for a Struct
+			  collapsed:: true
+				- Create a struct that implements `Drop` to print when it's dropped. Use it to demonstrate the order of drops in a function.
+				- **Success criteria:** You can predict when drops occur and verify with the printed output.
+		- collapsed:: true
+		  8. PREVIEW of Next
+			- Next: **Enums, Pattern Matching, and the Result Monad.**
+			- We will learn:
+				- How enums can hold data (like `Option<T>` and `Result<T, E>`)
+				- Pattern matching with `match`
+				- The `?` operator for error propagation
+				- How to define `RkiError` as a comprehensive error type
+			- Why this matters: Our RKI module will have many error conditions — invalid certificates, timeouts, protocol violations. We need a robust error handling system. Day 2 gives us the tools.
