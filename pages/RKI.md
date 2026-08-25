@@ -1965,6 +1965,7 @@
 		  ---
 - RKI CORE MODULE : A Journey
 	- Day 1 : Ownership, Borrowing, and Project Genesis
+	  collapsed:: true
 		- Rust exists because of a fundamental tension in systems programming: we want both **performance** (no garbage collector) and **safety** (no memory bugs). C and C++ give you performance but require manual memory management — leading to use-after-free, double-free, buffer overflows, and data races. Java and Python give you safety through garbage collection but at the cost of unpredictable latency and overhead.
 		- Rust resolves this tension with **ownership** — a compile-time system that proves memory safety without runtime cost. This is not a minor feature. This is the heart of the language. Everything else — borrowing, lifetimes, traits, async — builds upon ownership.
 		- collapsed:: true
@@ -2550,3 +2551,1410 @@
 				- The `?` operator for error propagation
 				- How to define `RkiError` as a comprehensive error type
 			- Why this matters: Our RKI module will have many error conditions — invalid certificates, timeouts, protocol violations. We need a robust error handling system. Day 2 gives us the tools.
+	- DAY 2: Enums, Pattern Matching, and the Result Monad
+	  collapsed:: true
+		- We learned that ownership is not a burden but a guarantee — the compiler proves your program will never double-free, never use-after-free, never data-race. Today we build on that foundation with Rust's most powerful feature: **enums with data**.
+		- In most languages, an enum is a glorified integer constant. In Rust, an enum is a full algebraic data type — a type that can be one of several variants, each potentially carrying different data. This single feature gives us `Option<T>`, `Result<T, E>`, and the foundation of our entire error handling system.
+		- By the end of today, you will have a complete `RkiError` type — the error taxonomy that will serve our module for the next 48 days.
+		- collapsed:: true
+		  1. RECALL — Day 1 Exercise Review
+			- Task 1 Solution: Extend the Config Struct
+			  collapsed:: true
+				- We successfully added `TlsConfig` to `RkiConfig`. Let me review what you did well and what we will improve.
+				- **What you did well:**
+					- `TlsConfig` owns its strings — correct ownership
+					- Validation rejects empty paths — good defensive programming
+					- `RkiConfig` composes `TlsConfig` — proper struct composition
+					- Tests cover valid and invalid cases — good test coverage
+				- **What we will improve today:**
+					- Your `ConfigError` enum has multiple variants — we will formalize this into a complete error taxonomy
+					- Your `DeviceInfo` has `Option<String>` for certificate — we will learn exactly what `Option` is
+					- Your tests use `.unwrap()` — we will learn the proper way to handle `Result`
+			- Task 2 Solution: DeviceInfo with Ownership
+			  collapsed:: true
+				- You implemented `DeviceInfo` with:
+					- `serial_number: String` — owned
+					- `certificate: Option<String>` — owned, but optional
+					- `set_certificate(&mut self, certificate: String)` — takes ownership
+				- This is correct. The `set_certificate` method takes ownership of the `String` and stores it in the struct. The caller can no longer use that `String` after the call.
+			- Task 3 Solution: Drop Order
+			  collapsed:: true
+				- You did not submit a Drop implementation, so let me provide one:
+				  collapsed:: true
+					- ```rust
+					  /// Demonstrates Drop order with a simple struct.
+					  pub struct DropTracker {
+					    name: String,
+					  }
+					  
+					  impl DropTracker {
+					    pub fn new(name: &str) -> Self {
+					        println!("Creating: {}", name);
+					        Self {
+					            name: name.to_string(),
+					        }
+					    }
+					  }
+					  
+					  impl Drop for DropTracker {
+					    fn drop(&mut self) {
+					        println!("Dropping: {}", self.name);
+					    }
+					  }
+					  
+					  pub fn demonstrate_drop_order() {
+					    let a = DropTracker::new("a");
+					    let b = DropTracker::new("b");
+					    let c = DropTracker::new("c");
+					    // c drops first, then b, then a (LIFO order)
+					  }
+					  ```
+					  
+					  **Output:**
+					  ```
+					  Creating: a
+					  Creating: b
+					  Creating: c
+					  Dropping: c
+					  Dropping: b
+					  Dropping: a
+					  ```
+					  
+					  This demonstrates that Rust drops values in reverse order of creation — LIFO, like the stack.
+		- collapsed:: true
+		  2. THEORETICAL FOUNDATION
+			- Enums as Algebraic Data Types
+			  collapsed:: true
+				- An **enum** (enumeration) in Rust is a type that can be one of several variants. Each variant can carry data:
+				  collapsed:: true
+					- ```rust
+					  enum Message {
+					    Quit,                        // No data
+					    Move { x: i32, y: i32 },     // Named fields
+					    Write(String),               // Single value
+					    ChangeColor(i32, i32, i32),  // Tuple of values
+					  }
+					  ```
+					  
+					  This is dramatically more powerful than C-style enums. In C:
+					  
+					  ```c
+					  enum Message {
+					    QUIT,
+					    MOVE,
+					    WRITE,
+					    CHANGE_COLOR
+					  };
+					  // Where do x, y, the string, and the colors go?
+					  ```
+					  
+					  In Rust, the data travels *with* the variant. This is an **algebraic data type** — a type formed by combining other types. The enum is a *sum type* (one of several possibilities), and each variant can be a *product type* (combining multiple values).
+			- `Option<T>` — Handling Absence
+			  collapsed:: true
+				- The most common enum in Rust is `Option<T>`:
+				  
+				  ```rust
+				  pub enum Option<T> {
+				    None,       // No value
+				    Some(T),    // A value of type T
+				  }
+				  ```
+				- This replaces `null` in other languages. But unlike `null`, `Option<T>` is **type-safe** — you cannot accidentally use a `None` as if it were a value. You must explicitly handle both cases.
+				- Your `DeviceInfo` uses `Option<String>` for the certificate:
+					- `None` — no certificate issued yet
+					- `Some(cert)` — certificate is present
+			- `Result<T, E>` — Handling Failure
+			  collapsed:: true
+				- The second most common enum is `Result<T, E>`:
+				  
+				  ```rust
+				  pub enum Result<T, E> {
+				    Ok(T),      // Success — contains the value
+				    Err(E),     // Failure — contains the error
+				  }
+				  ```
+				  
+				  This replaces exceptions in other languages. But unlike exceptions, `Result` is **explicit** — the type system forces you to handle the error case.
+			- Pattern Matching
+			  collapsed:: true
+				- To work with enums, we use `match`:
+					- ```rust
+					  match value {
+					    Pattern1 => expression1,
+					    Pattern2 => expression2,
+					    // ... all patterns must be covered
+					  }
+					  ```
+				- The compiler enforces **exhaustive matching** — every variant must be handled. This means you can never forget to handle an error case.
+			- The `?` Operator
+			  collapsed:: true
+				- The `?` operator is syntactic sugar for `match` with early return:
+				  
+				  ```rust
+				  // Without ?:
+				  let result = match fallible_function() {
+				    Ok(value) => value,
+				    Err(e) => return Err(e.into()),
+				  };
+				  
+				  // With ?:
+				  let result = fallible_function()?;
+				  ```
+				  
+				  If the function returns `Err`, `?` immediately returns from the current function with that error. If it returns `Ok`, `?` unwraps the value.
+		- collapsed:: true
+		  3. PROTOCOL CONTEXT
+			- Where Enums Appear in RKL v3 Mode 2
+			- Our RKI module uses enums throughout the protocol implementation:
+			- **1. Answer Codes (AN) in PEDI:**
+			  collapsed:: true
+				- ```
+				  Response: [AOPEDI;ANY;CC...;RD...;]
+				  ```
+				- The `AN` token can be:
+					- `Y` — Device found, keys available, certs verified
+					- `I` — Key not cleared; multiple loads not enabled
+					- `L` — Device locked
+					- `N` — Device not found or cert chain invalid
+				- This maps perfectly to a Rust enum:
+				  
+				  ```rust
+				  pub enum PediAnswer {
+				    Yes,        // AN=Y — proceed to PEDK
+				    KeyNotCleared, // AN=I — key not cleared
+				    DeviceLocked,  // AN=L — device locked
+				    DeviceNotFound, // AN=N — device not found
+				  }
+				  ```
+			- **2. BB Codes in PEDV:**
+			  collapsed:: true
+				- ```
+				  Response: [AOPEDV;BBY;...]
+				  ```
+				- `Y` — All confirmed, device locked
+				- `N` — Keys still available
+				- ```rust
+				  pub enum PedvStatus {
+				    Confirmed,   // BB=Y
+				    KeysAvailable, // BB=N
+				  }
+				  ```
+			- **3. Protocol Version:**
+			  collapsed:: true
+				- ```
+				  Request: [AOPEDI;VS3;MD2;...]
+				  ```
+				- `VS=3` — Protocol version 3
+				- `MD=2` — Mode 2 (one-pass TR-34)
+				  
+				  ```rust
+				  pub enum ProtocolVersion {
+				    V3,
+				  }
+				  
+				  pub enum ProtocolMode {
+				    Mode2, // One-pass TR-34
+				  }
+				  ```
+			- **4. Padding Mode (CE):**
+			  collapsed:: true
+				- ```
+				  Request: [AOPEDK;CE1;...]
+				  ```
+				- `CE=1` — `PKCS#1 v1.5`
+				- `CE=2` — PSS
+					- ```rust
+					  pub enum PaddingMode {
+					    Pkcs1V15,
+					    Pss,
+					  }
+					  ```
+			- **5. Error Conditions:**
+			  collapsed:: true
+				- Our module will encounter errors from three sources:
+				- **TLS errors** — certificate validation failures, handshake failures
+				- **Protocol errors** — malformed responses, unexpected tokens, timeouts
+				- **Configuration errors** — invalid paths, invalid ports
+				- This maps to our error taxonomy:
+				  collapsed:: true
+					- ```rust
+					  pub enum RkiError {
+					    Tls(TlsError),
+					    Protocol(ProtocolError),
+					    Config(ConfigError),
+					    // ... more as we discover them
+					  }
+					  ```
+			- Today's Focus
+			  collapsed:: true
+				- Today we:
+				  1. Learn how `Option` and `Result` work
+				  2. Define `ProtocolVersion` and related enums
+				  3. Build a comprehensive `RkiError` type hierarchy
+				  4. Refactor our config validation to use the new error types
+		- collapsed:: true
+		  4. RUST IMPLEMENTATION
+			- Step 1: Understanding `Option<T>`
+			  collapsed:: true
+				- Let's start with a simple example of `Option`:
+				  collapsed:: true
+					- ```rust
+					  /// Find the first token value in an RKL message.
+					  /// Returns None if the token is not present.
+					  fn find_token(message: &str, token_name: &str) -> Option<String> {
+					    // RKL messages are like: [AOPEDI;VS3;MD2;CD...;]
+					    // Tokens are separated by semicolons.
+					    for token in message.split(';') {
+					        if token.starts_with(token_name) {
+					            // Found the token — extract the value (after the token name)
+					            let value = token[token_name.len()..].to_string();
+					            return Some(value);
+					        }
+					    }
+					    None
+					  }
+					  
+					  #[cfg(test)]
+					  mod tests {
+					    use super::*;
+					  
+					    #[test]
+					    fn test_find_token_present() {
+					        let msg = "[AOPEDI;VS3;MD2;CDcert;]";
+					        let result = find_token(msg, "VS");
+					        assert_eq!(result, Some("3".to_string()));
+					    }
+					  
+					    #[test]
+					    fn test_find_token_absent() {
+					        let msg = "[AOPEDI;VS3;MD2;CDcert;]";
+					        let result = find_token(msg, "DG");
+					        assert_eq!(result, None);
+					    }
+					  }
+					  ```
+				- 📚 EXPLANATION
+				  collapsed:: true
+					- The `find_token` function returns `Option<String>`:
+						- `Some(value)` — token found, contains the value
+						- `None` — token not found
+					- We *cannot* accidentally use the result as a `String`. We must handle the `None` case:
+					  
+					  ```rust
+					  match find_token(msg, "DG") {
+					    Some(group) => println!("Device group: {}", group),
+					    None => println!("No device group specified"),
+					  }
+					  ```
+			- Step 2: Pattern Matching with `match`
+			  collapsed:: true
+				- Let's define our `ProtocolVersion` enum:
+				  collapsed:: true
+					- ```rust
+					  /// Protocol version for RKL commands.
+					  ///
+					  /// CryptoHub RKL v3 Mode 2 uses VS=3.
+					  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+					  pub enum ProtocolVersion {
+					    /// Version 3 (current)
+					    V3,
+					    /// Unknown or unsupported version
+					    Unknown(u8),
+					  }
+					  
+					  impl ProtocolVersion {
+					    /// Parse from the VS token value.
+					    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+					        match value.parse::<u8>() {
+					            Ok(3) => Ok(ProtocolVersion::V3),
+					            Ok(other) => Ok(ProtocolVersion::Unknown(other)),
+					            Err(_) => Err(ProtocolError::InvalidProtocolVersion(
+					                format!("Invalid VS value: {}", value)
+					            )),
+					        }
+					    }
+					  
+					    /// Serialize to the VS token value.
+					    pub fn to_token(&self) -> String {
+					        match self {
+					            ProtocolVersion::V3 => "3".to_string(),
+					            ProtocolVersion::Unknown(v) => v.to_string(),
+					        }
+					    }
+					  }
+					  ```
+				- 📚 EXPLANATION
+				- **`match` with patterns:** We match on the parsed integer:
+					- `Ok(3)` — version 3
+					- `Ok(other)` — some other version (unknown)
+					- `Err(_)` — not a valid integer
+				- **Exhaustive matching:** The compiler ensures we handle all cases. If we forgot `Err(_)`, it would not compile.
+				- **Derived traits:** `Debug` (printable), `Clone` (copyable), `Copy` (cheap copy), `PartialEq` (comparison), `Eq` (full equality).
+			- Step 3: The `Result` Monad
+			  collapsed:: true
+				- Now let's define `ProtocolMode` and `PaddingMode`:
+				  collapsed:: true
+					- ```rust
+					  /// Protocol mode for RKL commands.
+					  ///
+					  /// CryptoHub RKL v3 Mode 2 uses MD=2 (one-pass TR-34).
+					  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+					  pub enum ProtocolMode {
+					    /// Mode 2 — one-pass TR-34
+					    Mode2,
+					    /// Unknown or unsupported mode
+					    Unknown(u8),
+					  }
+					  
+					  impl ProtocolMode {
+					    /// Parse from the MD token value.
+					    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+					        match value.parse::<u8>() {
+					            Ok(2) => Ok(ProtocolMode::Mode2),
+					            Ok(other) => Ok(ProtocolMode::Unknown(other)),
+					            Err(_) => Err(ProtocolError::InvalidProtocolMode(
+					                format!("Invalid MD value: {}", value)
+					            )),
+					        }
+					    }
+					  
+					    /// Serialize to the MD token value.
+					    pub fn to_token(&self) -> String {
+					        match self {
+					            ProtocolMode::Mode2 => "2".to_string(),
+					            ProtocolMode::Unknown(v) => v.to_string(),
+					        }
+					    }
+					  }
+					  
+					  /// Padding mode for RSA operations.
+					  ///
+					  /// PEDK/PEDV use CE token:
+					  /// - CE=1 — PKCS#1 v1.5
+					  /// - CE=2 — PSS
+					  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+					  pub enum PaddingMode {
+					    /// PKCS#1 v1.5
+					    Pkcs1V15,
+					    /// PSS (Probabilistic Signature Scheme)
+					    Pss,
+					  }
+					  
+					  impl PaddingMode {
+					    /// Parse from the CE token value.
+					    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+					        match value.parse::<u8>() {
+					            Ok(1) => Ok(PaddingMode::Pkcs1V15),
+					            Ok(2) => Ok(PaddingMode::Pss),
+					            Ok(other) => Err(ProtocolError::InvalidPaddingMode(
+					                format!("Invalid CE value: {}", other)
+					            )),
+					            Err(_) => Err(ProtocolError::InvalidPaddingMode(
+					                format!("Invalid CE value: {}", value)
+					            )),
+					        }
+					    }
+					  
+					    /// Serialize to the CE token value.
+					    pub fn to_token(&self) -> String {
+					        match self {
+					            PaddingMode::Pkcs1V15 => "1".to_string(),
+					            PaddingMode::Pss => "2".to_string(),
+					        }
+					    }
+					  }
+					  ```
+				- 📚 EXPLANATION
+				- **`Result` with error types:** Each `from_token` method returns `Result<Self, ProtocolError>`. This forces the caller to handle parse failures.
+				- **The `?` operator:** Inside `from_token`, we use `match` for clarity. But we could use `?`:
+				  collapsed:: true
+					- ```rust
+					  pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+					    let parsed = value.parse::<u8>()
+					        .map_err(|_| ProtocolError::InvalidProtocolVersion(
+					            format!("Invalid VS value: {}", value)
+					        ))?;
+					    match parsed {
+					        3 => Ok(ProtocolVersion::V3),
+					        other => Ok(ProtocolVersion::Unknown(other)),
+					    }
+					  }
+					  ```
+			- Step 4: Complete Error Taxonomy
+			  collapsed:: true
+				- Now we build our comprehensive error hierarchy:
+				  collapsed:: true
+					- ```rust
+					  // src/error.rs
+					  
+					  use std::path::PathBuf;
+					  
+					  /// Top-level error type for the RKI Core module.
+					  ///
+					  /// This enum categorizes all errors by their source.
+					  #[derive(Debug, thiserror::Error)]
+					  pub enum RkiError {
+					    /// TLS-related errors (certificate loading, handshake failures)
+					    #[error("TLS error: {0}")]
+					    Tls(#[from] TlsError),
+					  
+					    /// Protocol-related errors (malformed messages, timeouts, invalid tokens)
+					    #[error("Protocol error: {0}")]
+					    Protocol(#[from] ProtocolError),
+					  
+					    /// Configuration errors (invalid paths, ports, URLs)
+					    #[error("Configuration error: {0}")]
+					    Config(#[from] ConfigError),
+					  
+					    /// Cryptographic errors (signature verification, decryption)
+					    #[error("Cryptographic error: {0}")]
+					    Crypto(#[from] CryptoError),
+					  
+					    /// I/O errors (file read/write, network)
+					    #[error("I/O error: {0}")]
+					    Io(#[from] std::io::Error),
+					  
+					    /// Session errors (expired, not authenticated)
+					    #[error("Session error: {0}")]
+					    Session(#[from] SessionError),
+					  }
+					  
+					  /// TLS-specific errors.
+					  #[derive(Debug, thiserror::Error)]
+					  pub enum TlsError {
+					    /// Certificate file not found
+					    #[error("Certificate file not found: {0}")]
+					    CertFileNotFound(PathBuf),
+					  
+					    /// Private key file not found
+					    #[error("Private key file not found: {0}")]
+					    KeyFileNotFound(PathBuf),
+					  
+					    /// Invalid certificate format
+					    #[error("Invalid certificate format: {0}")]
+					    InvalidCertificate(String),
+					  
+					    /// Invalid private key format
+					    #[error("Invalid private key format: {0}")]
+					    InvalidPrivateKey(String),
+					  
+					    /// TLS handshake failed
+					    #[error("TLS handshake failed: {0}")]
+					    HandshakeFailed(String),
+					  
+					    /// Client certificate verification failed
+					    #[error("Client certificate verification failed: {0}")]
+					    ClientCertVerificationFailed(String),
+					  }
+					  
+					  /// Protocol-specific errors.
+					  #[derive(Debug, thiserror::Error)]
+					  pub enum ProtocolError {
+					    /// Invalid protocol version (VS token)
+					    #[error("Invalid protocol version: {0}")]
+					    InvalidProtocolVersion(String),
+					  
+					    /// Invalid protocol mode (MD token)
+					    #[error("Invalid protocol mode: {0}")]
+					    InvalidProtocolMode(String),
+					  
+					    /// Invalid padding mode (CE token)
+					    #[error("Invalid padding mode: {0}")]
+					    InvalidPaddingMode(String),
+					  
+					    /// Malformed RKL message
+					    #[error("Malformed RKL message: {0}")]
+					    MalformedMessage(String),
+					  
+					    /// Missing required token
+					    #[error("Missing required token: {0}")]
+					    MissingToken(String),
+					  
+					    /// Unexpected token in response
+					    #[error("Unexpected token: {0}")]
+					    UnexpectedToken(String),
+					  
+					    /// Invalid answer code (AN token)
+					    #[error("Invalid answer code: {0}")]
+					    InvalidAnswerCode(String),
+					  
+					    /// PEDI failed with AN=I (key not cleared)
+					    #[error("PEDI failed: key not cleared (AN=I)")]
+					    PediKeyNotCleared,
+					  
+					    /// PEDI failed with AN=L (device locked)
+					    #[error("PEDI failed: device locked (AN=L)")]
+					    PediDeviceLocked,
+					  
+					    /// PEDI failed with AN=N (device not found)
+					    #[error("PEDI failed: device not found (AN=N)")]
+					    PediDeviceNotFound,
+					  
+					    /// PEDV failed with BB=N (keys still available)
+					    #[error("PEDV failed: keys still available (BB=N)")]
+					    PedvKeysAvailable,
+					  
+					    /// One-pass timeout exceeded (30 seconds)
+					    #[error("One-pass timeout exceeded (30 seconds)")]
+					    OnePassTimeout,
+					  
+					    /// Session expired
+					    #[error("Session expired")]
+					    SessionExpired,
+					  }
+					  
+					  /// Configuration-specific errors.
+					  #[derive(Debug, thiserror::Error)]
+					  pub enum ConfigError {
+					    /// Invalid port number
+					    #[error("Invalid port: {0}")]
+					    InvalidPort(String),
+					  
+					    /// Invalid URL
+					    #[error("Invalid URL: {0}")]
+					    InvalidUrl(String),
+					  
+					    /// Invalid path
+					    #[error("Invalid path: {0}")]
+					    InvalidPath(String),
+					  
+					    /// Empty serial number
+					    #[error("Empty serial number: {0}")]
+					    EmptySerialNumber(String),
+					  
+					    /// Missing required configuration field
+					    #[error("Missing required configuration: {0}")]
+					    MissingField(String),
+					  }
+					  
+					  /// Cryptographic-specific errors.
+					  #[derive(Debug, thiserror::Error)]
+					  pub enum CryptoError {
+					    /// Signature verification failed
+					    #[error("Signature verification failed: {0}")]
+					    SignatureVerificationFailed(String),
+					  
+					    /// Decryption failed
+					    #[error("Decryption failed: {0}")]
+					    DecryptionFailed(String),
+					  
+					    /// Key generation failed
+					    #[error("Key generation failed: {0}")]
+					    KeyGenerationFailed(String),
+					  
+					    /// Invalid key format
+					    #[error("Invalid key format: {0}")]
+					    InvalidKeyFormat(String),
+					  
+					    /// KCV mismatch
+					    #[error("KCV mismatch: expected {0}, got {1}")]
+					    KcvMismatch(String, String),
+					  }
+					  
+					  /// Session-specific errors.
+					  #[derive(Debug, thiserror::Error)]
+					  pub enum SessionError {
+					    /// Not authenticated
+					    #[error("Not authenticated")]
+					    NotAuthenticated,
+					  
+					    /// Session already expired
+					    #[error("Session already expired at {0}")]
+					    AlreadyExpired(chrono::DateTime<chrono::Utc>),
+					  
+					    /// JWT invalid
+					    #[error("Invalid JWT: {0}")]
+					    InvalidJwt(String),
+					  
+					    /// Session not found
+					    #[error("Session not found: {0}")]
+					    NotFound(String),
+					  }
+					  ```
+				- 📚 EXPLANATION
+				- **`thiserror::Error` derive:** This macro automatically implements `Display` and `Error` traits for our enums. Each variant's `#[error("...")]` attribute defines the Display message.
+				- **`#[from]` attribute:** This automatically implements `From<TlsError> for RkiError`, `From<ProtocolError> for RkiError`, etc. This enables the `?` operator to convert errors automatically:
+					- ```rust
+					  fn tls_function() -> Result<(), TlsError> {
+					    // ...
+					  }
+					  
+					  fn higher_level_function() -> Result<(), RkiError> {
+					    // The ? operator converts TlsError to RkiError via From
+					    tls_function()?;
+					    Ok(())
+					  }
+					  ```
+				- **Error chaining:** The `#[error("TLS error: {0}")]` embeds the inner error's message. This gives us a full error chain.
+			- Step 5: Define Answer Codes
+			  collapsed:: true
+				- Now let's define the `PediAnswer` and `PedvStatus` enums:
+				  collapsed:: true
+					- ```rust
+					  // src/protocol.rs
+					  
+					  use crate::error::{ProtocolError, RkiError};
+					  
+					  /// PEDI answer code (AN token).
+					  ///
+					  /// From CryptoHub 7.3.0.x documentation:
+					  /// - Y: Device found, keys available, certs verified
+					  /// - I: Key not cleared; multiple loads not enabled
+					  /// - L: Device locked
+					  /// - N: Device not found or cert chain invalid
+					  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+					  pub enum PediAnswer {
+					    /// AN=Y — proceed to PEDK
+					    Yes,
+					    /// AN=I — key not cleared
+					    KeyNotCleared,
+					    /// AN=L — device locked
+					    DeviceLocked,
+					    /// AN=N — device not found
+					    DeviceNotFound,
+					  }
+					  
+					  impl PediAnswer {
+					    /// Parse from the AN token value.
+					    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+					        match value.trim() {
+					            "Y" | "y" => Ok(PediAnswer::Yes),
+					            "I" | "i" => Ok(PediAnswer::KeyNotCleared),
+					            "L" | "l" => Ok(PediAnswer::DeviceLocked),
+					            "N" | "n" => Ok(PediAnswer::DeviceNotFound),
+					            other => Err(ProtocolError::InvalidAnswerCode(
+					                format!("Invalid AN code: {}", other)
+					            )),
+					        }
+					    }
+					  
+					    /// Convert to the appropriate error if not success.
+					    pub fn into_result(self) -> Result<(), ProtocolError> {
+					        match self {
+					            PediAnswer::Yes => Ok(()),
+					            PediAnswer::KeyNotCleared => Err(ProtocolError::PediKeyNotCleared),
+					            PediAnswer::DeviceLocked => Err(ProtocolError::PediDeviceLocked),
+					            PediAnswer::DeviceNotFound => Err(ProtocolError::PediDeviceNotFound),
+					        }
+					    }
+					  }
+					  
+					  /// PEDV status code (BB token).
+					  ///
+					  /// From CryptoHub 7.3.0.x documentation:
+					  /// - Y: All confirmed, device locked
+					  /// - N: Keys still available
+					  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+					  pub enum PedvStatus {
+					    /// BB=Y — confirmed, signed receipt
+					    Confirmed,
+					    /// BB=N — keys still available
+					    KeysAvailable,
+					  }
+					  
+					  impl PedvStatus {
+					    /// Parse from the BB token value.
+					    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+					        match value.trim() {
+					            "Y" | "y" => Ok(PedvStatus::Confirmed),
+					            "N" | "n" => Ok(PedvStatus::KeysAvailable),
+					            other => Err(ProtocolError::InvalidAnswerCode(
+					                format!("Invalid BB code: {}", other)
+					            )),
+					        }
+					    }
+					  
+					    /// Convert to the appropriate error if not confirmed.
+					    pub fn into_result(self) -> Result<(), ProtocolError> {
+					        match self {
+					            PedvStatus::Confirmed => Ok(()),
+					            PedvStatus::KeysAvailable => Err(ProtocolError::PedvKeysAvailable),
+					        }
+					    }
+					  }
+					  ```
+				- 📚 EXPLANATION
+				- **`into_result()` method:** This converts a successful parse into either `Ok(())` (success) or an `Err(ProtocolError)` (failure). This allows us to write:
+					- ```rust
+					  let answer = PediAnswer::from_token("Y")?;
+					  answer.into_result()?; // Returns Err if not Yes
+					  ```
+				- This is a pattern we will use throughout the protocol implementation.
+			- Step 6: Update Config to Use New Error Types
+			  collapsed:: true
+				- Now let's update our config to use the new error types:
+					- ```rust
+					  // src/config.rs (partial update)
+					  
+					  use crate::error::{ConfigError, RkiError};
+					  
+					  impl TlsConfig {
+					    pub fn new(
+					        ca_cert_path: String,
+					        tms_cert_path: String,
+					        tms_key_path: String,
+					    ) -> Result<Self, ConfigError> {
+					        if ca_cert_path.is_empty() {
+					            return Err(ConfigError::InvalidPath(
+					                "ca_cert_path cannot be empty".into(),
+					            ));
+					        }
+					        if tms_cert_path.is_empty() {
+					            return Err(ConfigError::InvalidPath(
+					                "tms_cert_path cannot be empty".into(),
+					            ));
+					        }
+					        if tms_key_path.is_empty() {
+					            return Err(ConfigError::InvalidPath(
+					                "tms_key_path cannot be empty".into(),
+					            ));
+					        }
+					        Ok(Self {
+					            ca_cert_path,
+					            tms_cert_path,
+					            tms_key_path,
+					        })
+					    }
+					  }
+					  
+					  impl RkiConfig {
+					    pub fn new(
+					        cryptohub_host: String,
+					        cryptohub_port: u16,
+					        terminal_port: u16,
+					        ca_url: String,
+					        tls_config: TlsConfig,
+					    ) -> Result<Self, ConfigError> {
+					        if cryptohub_port == 0 {
+					            return Err(ConfigError::InvalidPort(
+					                "cryptohub_port cannot be zero".into(),
+					            ));
+					        }
+					        if terminal_port == 0 {
+					            return Err(ConfigError::InvalidPort(
+					                "terminal_port cannot be zero".into(),
+					            ));
+					        }
+					        if !ca_url.starts_with("https://") {
+					            return Err(ConfigError::InvalidUrl(
+					                "ca_url must start with https://".into(),
+					            ));
+					        }
+					        Ok(Self {
+					            cryptohub_host,
+					            cryptohub_port,
+					            terminal_port,
+					            ca_url,
+					            tls_config,
+					        })
+					    }
+					  }
+					  ```
+					  
+					  ---
+		- collapsed:: true
+		  5. RKI APPLICATION
+			- What We Built Today
+				- We created:
+					- `ProtocolVersion` enum — VS token values
+					- `ProtocolMode` enum — MD token values
+					- `PaddingMode` enum — CE token values
+					- `PediAnswer` enum — AN token values (Y/I/L/N)
+					- `PedvStatus` enum — BB token values (Y/N)
+					- `RkiError` — complete error taxonomy with `thiserror`
+			- These types will be used throughout our protocol implementation:
+			  collapsed:: true
+				- `PediAnswer` will be parsed from every PEDI response
+				- `PedvStatus` will be parsed from every PEDV response
+				- `ProtocolVersion` and `ProtocolMode` will be serialized into every request
+				- `PaddingMode` will be used in PEDK/PEDV
+				- `RkiError` will be the return type of every fallible function
+			- Complete File Structure
+			  collapsed:: true
+				- ```
+				  src/
+				  ├── lib.rs        # Re-exports, module declarations
+				  ├── error.rs      # RkiError, TlsError, ProtocolError, ConfigError, CryptoError, SessionError
+				  ├── config.rs     # RkiConfig, TlsConfig, DeviceInfo
+				  ├── protocol.rs   # ProtocolVersion, ProtocolMode, PaddingMode, PediAnswer, PedvStatus
+				  └── main.rs       # CLI entry point
+				  ```
+			- Updated `lib.rs`
+			  collapsed:: true
+				- ```rust
+				  // src/lib.rs
+				  
+				  pub mod config;
+				  pub mod error;
+				  pub mod protocol;
+				  
+				  pub use config::{DeviceInfo, RkiConfig, TlsConfig};
+				  pub use error::{
+				    ConfigError, CryptoError, ProtocolError, RkiError, SessionError, TlsError,
+				  };
+				  pub use protocol::{PaddingMode, PediAnswer, PedvStatus, ProtocolMode, ProtocolVersion};
+				  ```
+		- collapsed:: true
+		  6. COMMON PITFALLS
+			- Pitfall 1: Forgetting That `match` Must Be Exhaustive
+			  collapsed:: true
+				- **Why beginners make this mistake:** Used to languages where `switch` has `default`.
+				- **How to detect:** Compiler error "non-exhaustive patterns."
+				- **How to prevent:** Always handle every variant. Use `_ =>` as a catch-all only when appropriate.
+			- Pitfall 2: Using `unwrap()` Instead of Proper Error Handling
+			  collapsed:: true
+				- **Why beginners make this mistake:** `unwrap()` is easier than handling `Result`.
+				- **How to detect:** Code review — look for `.unwrap()` in production code.
+				- **How to prevent:** Use `?` in functions that return `Result`. Use `match` for explicit handling. Only use `.expect()` for truly unrecoverable errors (like config file missing).
+			- Pitfall 3: Confusing `Option::map` with `match`
+			  collapsed:: true
+				- **Why beginners make this mistake:** Functional programming concepts are new.
+				- **How to detect:** Verbose `match` blocks that could be simplified.
+				- **How to prevent:** Learn the `Option` and `Result` combinators: `map`, `and_then`, `unwrap_or`, `unwrap_or_else`.
+			- Pitfall 4: Returning `Result<Option<T>, E>` When `Option<Result<T, E>>` Is Better
+			  collapsed:: true
+				- **Why beginners make this mistake:** Unclear about which layer the error belongs to.
+				- **How to detect:** Confusing error handling code.
+				- **How to prevent:** Ask: "Does the error occur during the operation, or does the operation return 'no value' as a valid result?"
+			- Pitfall 5: Not Implementing `From` for Error Conversion
+			  collapsed:: true
+				- **Why beginners make this mistake:** Don't know about the `From` trait.
+				- **How to detect:** Lots of `.map_err(|e| ...)` boilerplate.
+				- **How to prevent:** Use `#[from]` in `thiserror` to auto-generate `From` implementations.
+		- collapsed:: true
+		  7. EXERCISE
+			- Task 1: Complete the Answer Code Enums
+			  collapsed:: true
+				- Add a `from_token` method to `PediAnswer` and `PedvStatus` that handles whitespace and case-insensitive input (e.g., " Y ", "y", "N").
+				- **Success criteria:** Tests pass for valid and invalid inputs.
+			- Task 2: Add a `RklCommand` Enum
+			  collapsed:: true
+				- Create an enum that represents all RKL commands:
+					- ```rust
+					  pub enum RklCommand {
+					    Rklg,  // Login
+					    Pedi,  // Identification
+					    Pedk,  // Key request
+					    Pedv,  // Key verification
+					  }
+					  ```
+				- Add a `from_token` method that parses the `AO` token value.
+				- **Success criteria:** Tests pass for all four commands and invalid input.
+			- Task 3 (Stretch Goal): Implement `Display` for `ProtocolVersion`
+			  collapsed:: true
+				- Implement `Display` so that `ProtocolVersion::V3` formats as "3" and `ProtocolVersion::Unknown(5)` formats as "5".
+				- **Success criteria:** `format!("{}", ProtocolVersion::V3) == "3"`.
+		- collapsed:: true
+		  8. PREVIEW
+			- Tomorrow: **Error Handling as a Discipline.**
+			- We will learn:
+				- How to structure error types for maximum clarity
+				- How to use `thiserror` effectively
+				- How to write error messages that are useful for debugging
+				- How to test error paths
+			- Why this matters: Our RKI module will encounter many error conditions. Understanding how to handle them properly is essential for building a reliable system.
+			  
+			  ---
+		- COMPLETE CODE FOR TODAY
+		  collapsed:: true
+			- `src/error.rs`
+			  collapsed:: true
+				- ```rust
+				  use std::path::PathBuf;
+				  
+				  /// Top-level error type for the RKI Core module.
+				  #[derive(Debug, thiserror::Error)]
+				  pub enum RkiError {
+				    /// TLS-related errors
+				    #[error("TLS error: {0}")]
+				    Tls(#[from] TlsError),
+				  
+				    /// Protocol-related errors
+				    #[error("Protocol error: {0}")]
+				    Protocol(#[from] ProtocolError),
+				  
+				    /// Configuration errors
+				    #[error("Configuration error: {0}")]
+				    Config(#[from] ConfigError),
+				  
+				    /// Cryptographic errors
+				    #[error("Cryptographic error: {0}")]
+				    Crypto(#[from] CryptoError),
+				  
+				    /// I/O errors
+				    #[error("I/O error: {0}")]
+				    Io(#[from] std::io::Error),
+				  
+				    /// Session errors
+				    #[error("Session error: {0}")]
+				    Session(#[from] SessionError),
+				  }
+				  
+				  /// TLS-specific errors.
+				  #[derive(Debug, thiserror::Error)]
+				  pub enum TlsError {
+				    #[error("Certificate file not found: {0}")]
+				    CertFileNotFound(PathBuf),
+				  
+				    #[error("Private key file not found: {0}")]
+				    KeyFileNotFound(PathBuf),
+				  
+				    #[error("Invalid certificate format: {0}")]
+				    InvalidCertificate(String),
+				  
+				    #[error("Invalid private key format: {0}")]
+				    InvalidPrivateKey(String),
+				  
+				    #[error("TLS handshake failed: {0}")]
+				    HandshakeFailed(String),
+				  
+				    #[error("Client certificate verification failed: {0}")]
+				    ClientCertVerificationFailed(String),
+				  }
+				  
+				  /// Protocol-specific errors.
+				  #[derive(Debug, thiserror::Error)]
+				  pub enum ProtocolError {
+				    #[error("Invalid protocol version: {0}")]
+				    InvalidProtocolVersion(String),
+				  
+				    #[error("Invalid protocol mode: {0}")]
+				    InvalidProtocolMode(String),
+				  
+				    #[error("Invalid padding mode: {0}")]
+				    InvalidPaddingMode(String),
+				  
+				    #[error("Malformed RKL message: {0}")]
+				    MalformedMessage(String),
+				  
+				    #[error("Missing required token: {0}")]
+				    MissingToken(String),
+				  
+				    #[error("Unexpected token: {0}")]
+				    UnexpectedToken(String),
+				  
+				    #[error("Invalid answer code: {0}")]
+				    InvalidAnswerCode(String),
+				  
+				    #[error("PEDI failed: key not cleared (AN=I)")]
+				    PediKeyNotCleared,
+				  
+				    #[error("PEDI failed: device locked (AN=L)")]
+				    PediDeviceLocked,
+				  
+				    #[error("PEDI failed: device not found (AN=N)")]
+				    PediDeviceNotFound,
+				  
+				    #[error("PEDV failed: keys still available (BB=N)")]
+				    PedvKeysAvailable,
+				  
+				    #[error("One-pass timeout exceeded (30 seconds)")]
+				    OnePassTimeout,
+				  
+				    #[error("Session expired")]
+				    SessionExpired,
+				  }
+				  
+				  /// Configuration-specific errors.
+				  #[derive(Debug, thiserror::Error)]
+				  pub enum ConfigError {
+				    #[error("Invalid port: {0}")]
+				    InvalidPort(String),
+				  
+				    #[error("Invalid URL: {0}")]
+				    InvalidUrl(String),
+				  
+				    #[error("Invalid path: {0}")]
+				    InvalidPath(String),
+				  
+				    #[error("Empty serial number: {0}")]
+				    EmptySerialNumber(String),
+				  
+				    #[error("Missing required configuration: {0}")]
+				    MissingField(String),
+				  }
+				  
+				  /// Cryptographic-specific errors.
+				  #[derive(Debug, thiserror::Error)]
+				  pub enum CryptoError {
+				    #[error("Signature verification failed: {0}")]
+				    SignatureVerificationFailed(String),
+				  
+				    #[error("Decryption failed: {0}")]
+				    DecryptionFailed(String),
+				  
+				    #[error("Key generation failed: {0}")]
+				    KeyGenerationFailed(String),
+				  
+				    #[error("Invalid key format: {0}")]
+				    InvalidKeyFormat(String),
+				  
+				    #[error("KCV mismatch: expected {0}, got {1}")]
+				    KcvMismatch(String, String),
+				  }
+				  
+				  /// Session-specific errors.
+				  #[derive(Debug, thiserror::Error)]
+				  pub enum SessionError {
+				    #[error("Not authenticated")]
+				    NotAuthenticated,
+				  
+				    #[error("Session already expired at {0}")]
+				    AlreadyExpired(chrono::DateTime<chrono::Utc>),
+				  
+				    #[error("Invalid JWT: {0}")]
+				    InvalidJwt(String),
+				  
+				    #[error("Session not found: {0}")]
+				    NotFound(String),
+				  }
+				  ```
+			- ### `src/protocol.rs`
+			  collapsed:: true
+				- ```rust
+				  use crate::error::ProtocolError;
+				  
+				  /// Protocol version for RKL commands.
+				  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+				  pub enum ProtocolVersion {
+				    V3,
+				    Unknown(u8),
+				  }
+				  
+				  impl ProtocolVersion {
+				    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+				        match value.trim().parse::<u8>() {
+				            Ok(3) => Ok(ProtocolVersion::V3),
+				            Ok(other) => Ok(ProtocolVersion::Unknown(other)),
+				            Err(_) => Err(ProtocolError::InvalidProtocolVersion(
+				                format!("Invalid VS value: {}", value)
+				            )),
+				        }
+				    }
+				  
+				    pub fn to_token(&self) -> String {
+				        match self {
+				            ProtocolVersion::V3 => "3".to_string(),
+				            ProtocolVersion::Unknown(v) => v.to_string(),
+				        }
+				    }
+				  }
+				  
+				  /// Protocol mode for RKL commands.
+				  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+				  pub enum ProtocolMode {
+				    Mode2,
+				    Unknown(u8),
+				  }
+				  
+				  impl ProtocolMode {
+				    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+				        match value.trim().parse::<u8>() {
+				            Ok(2) => Ok(ProtocolMode::Mode2),
+				            Ok(other) => Ok(ProtocolMode::Unknown(other)),
+				            Err(_) => Err(ProtocolError::InvalidProtocolMode(
+				                format!("Invalid MD value: {}", value)
+				            )),
+				        }
+				    }
+				  
+				    pub fn to_token(&self) -> String {
+				        match self {
+				            ProtocolMode::Mode2 => "2".to_string(),
+				            ProtocolMode::Unknown(v) => v.to_string(),
+				        }
+				    }
+				  }
+				  
+				  /// Padding mode for RSA operations.
+				  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+				  pub enum PaddingMode {
+				    Pkcs1V15,
+				    Pss,
+				  }
+				  
+				  impl PaddingMode {
+				    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+				        match value.trim().parse::<u8>() {
+				            Ok(1) => Ok(PaddingMode::Pkcs1V15),
+				            Ok(2) => Ok(PaddingMode::Pss),
+				            Ok(other) => Err(ProtocolError::InvalidPaddingMode(
+				                format!("Invalid CE value: {}", other)
+				            )),
+				            Err(_) => Err(ProtocolError::InvalidPaddingMode(
+				                format!("Invalid CE value: {}", value)
+				            )),
+				        }
+				    }
+				  
+				    pub fn to_token(&self) -> String {
+				        match self {
+				            PaddingMode::Pkcs1V15 => "1".to_string(),
+				            PaddingMode::Pss => "2".to_string(),
+				        }
+				    }
+				  }
+				  
+				  /// PEDI answer code (AN token).
+				  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+				  pub enum PediAnswer {
+				    Yes,
+				    KeyNotCleared,
+				    DeviceLocked,
+				    DeviceNotFound,
+				  }
+				  
+				  impl PediAnswer {
+				    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+				        match value.trim() {
+				            "Y" | "y" => Ok(PediAnswer::Yes),
+				            "I" | "i" => Ok(PediAnswer::KeyNotCleared),
+				            "L" | "l" => Ok(PediAnswer::DeviceLocked),
+				            "N" | "n" => Ok(PediAnswer::DeviceNotFound),
+				            other => Err(ProtocolError::InvalidAnswerCode(
+				                format!("Invalid AN code: {}", other)
+				            )),
+				        }
+				    }
+				  
+				    pub fn into_result(self) -> Result<(), ProtocolError> {
+				        match self {
+				            PediAnswer::Yes => Ok(()),
+				            PediAnswer::KeyNotCleared => Err(ProtocolError::PediKeyNotCleared),
+				            PediAnswer::DeviceLocked => Err(ProtocolError::PediDeviceLocked),
+				            PediAnswer::DeviceNotFound => Err(ProtocolError::PediDeviceNotFound),
+				        }
+				    }
+				  }
+				  
+				  /// PEDV status code (BB token).
+				  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+				  pub enum PedvStatus {
+				    Confirmed,
+				    KeysAvailable,
+				  }
+				  
+				  impl PedvStatus {
+				    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+				        match value.trim() {
+				            "Y" | "y" => Ok(PedvStatus::Confirmed),
+				            "N" | "n" => Ok(PedvStatus::KeysAvailable),
+				            other => Err(ProtocolError::InvalidAnswerCode(
+				                format!("Invalid BB code: {}", other)
+				            )),
+				        }
+				    }
+				  
+				    pub fn into_result(self) -> Result<(), ProtocolError> {
+				        match self {
+				            PedvStatus::Confirmed => Ok(()),
+				            PedvStatus::KeysAvailable => Err(ProtocolError::PedvKeysAvailable),
+				        }
+				    }
+				  }
+				  
+				  /// RKL command type (AO token).
+				  #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+				  pub enum RklCommand {
+				    Rklg,
+				    Pedi,
+				    Pedk,
+				    Pedv,
+				  }
+				  
+				  impl RklCommand {
+				    pub fn from_token(value: &str) -> Result<Self, ProtocolError> {
+				        match value.trim().to_uppercase().as_str() {
+				            "AORKLG" | "RKLG" => Ok(RklCommand::Rklg),
+				            "AOPEDI" | "PEDI" => Ok(RklCommand::Pedi),
+				            "AOPEDK" | "PEDK" => Ok(RklCommand::Pedk),
+				            "AOPEDV" | "PEDV" => Ok(RklCommand::Pedv),
+				            other => Err(ProtocolError::UnexpectedToken(
+				                format!("Unknown command: {}", other)
+				            )),
+				        }
+				    }
+				  
+				    pub fn to_token(&self) -> &'static str {
+				        match self {
+				            RklCommand::Rklg => "AORKLG",
+				            RklCommand::Pedi => "AOPEDI",
+				            RklCommand::Pedk => "AOPEDK",
+				            RklCommand::Pedv => "AOPEDV",
+				        }
+				    }
+				  }
+				  ```
+			- ### `src/lib.rs`
+			  collapsed:: true
+				- ```rust
+				  pub mod config;
+				  pub mod error;
+				  pub mod protocol;
+				  
+				  pub use config::{DeviceInfo, RkiConfig, TlsConfig};
+				  pub use error::{
+				    ConfigError, CryptoError, ProtocolError, RkiError, SessionError, TlsError,
+				  };
+				  pub use protocol::{
+				    PaddingMode, PediAnswer, PedvStatus, ProtocolMode, ProtocolVersion, RklCommand,
+				  };
+				  ```
+			- ### `src/config.rs`
+			  collapsed:: true
+				- ```rust
+				  use chrono::{DateTime, Utc};
+				  
+				  use crate::error::ConfigError;
+				  
+				  /// TLS Configuration for the RKI Core module.
+				  #[derive(Debug, Clone)]
+				  pub struct TlsConfig {
+				    pub ca_cert_path: String,
+				    pub tms_cert_path: String,
+				    pub tms_key_path: String,
+				  }
+				  
+				  impl TlsConfig {
+				    pub fn new(
+				        ca_cert_path: String,
+				        tms_cert_path: String,
+				        tms_key_path: String,
+				    ) -> Result<Self, ConfigError> {
+				        if ca_cert_path.is_empty() {
+				            return Err(ConfigError::InvalidPath(
+				                "ca_cert_path cannot be empty".into(),
+				            ));
+				        }
+				        if tms_cert_path.is_empty() {
+				            return Err(ConfigError::InvalidPath(
+				                "tms_cert_path cannot be empty".into(),
+				            ));
+				        }
+				        if tms_key_path.is_empty() {
+				            return Err(ConfigError::InvalidPath(
+				                "tms_key_path cannot be empty".into(),
+				            ));
+				        }
+				        Ok(Self {
+				            ca_cert_path,
+				            tms_cert_path,
+				            tms_key_path,
+				        })
+				    }
+				  }
+				  
+				  /// Configuration for the RKI Core module.
+				  #[derive(Debug, Clone)]
+				  pub struct RkiConfig {
+				    pub cryptohub_host: String,
+				    pub cryptohub_port: u16,
+				    pub terminal_port: u16,
+				    pub ca_url: String,
+				    pub tls_config: TlsConfig,
+				  }
+				  
+				  impl RkiConfig {
+				    pub fn new(
+				        cryptohub_host: String,
+				        cryptohub_port: u16,
+				        terminal_port: u16,
+				        ca_url: String,
+				        tls_config: TlsConfig,
+				    ) -> Result<Self, ConfigError> {
+				        if cryptohub_port == 0 {
+				            return Err(ConfigError::InvalidPort(
+				                "cryptohub_port cannot be zero".into(),
+				            ));
+				        }
+				        if terminal_port == 0 {
+				            return Err(ConfigError::InvalidPort(
+				                "terminal_port cannot be zero".into(),
+				            ));
+				        }
+				        if !ca_url.starts_with("https://") {
+				            return Err(ConfigError::InvalidUrl(
+				                "ca_url must start with https://".into(),
+				            ));
+				        }
+				        Ok(Self {
+				            cryptohub_host,
+				            cryptohub_port,
+				            terminal_port,
+				            ca_url,
+				            tls_config,
+				        })
+				    }
+				  
+				    #[must_use]
+				    pub fn cryptohub_address(&self) -> String {
+				        format!("{}:{}", self.cryptohub_host, self.cryptohub_port)
+				    }
+				  }
+				  
+				  /// Device information stored in the TMS database.
+				  #[derive(Debug, Clone)]
+				  pub struct DeviceInfo {
+				    serial_number: String,
+				    certificate: Option<String>,
+				    issued_at: Option<DateTime<Utc>>,
+				    expires_at: Option<DateTime<Utc>>,
+				  }
+				  
+				  impl DeviceInfo {
+				    pub fn new(
+				        serial_number: String,
+				        certificate: Option<String>,
+				        issued_at: Option<DateTime<Utc>>,
+				        expires_at: Option<DateTime<Utc>>,
+				    ) -> Result<Self, ConfigError> {
+				        if serial_number.is_empty() {
+				            return Err(ConfigError::EmptySerialNumber(
+				                "serial_number cannot be empty".into(),
+				            ));
+				        }
+				        Ok(Self {
+				            serial_number,
+				            certificate,
+				            issued_at,
+				            expires_at,
+				        })
+				    }
+				  
+				    #[must_use]
+				    pub const fn has_certificate(&self) -> bool {
+				        self.certificate.is_some()
+				    }
+				  
+				    pub fn set_certificate(&mut self, certificate: String) {
+				        self.certificate = Some(certificate);
+				    }
+				  
+				    #[must_use]
+				    pub fn get_serial_number(&self) -> &str {
+				        &self.serial_number
+				    }
+				  
+				    #[must_use]
+				    pub fn get_certificate(&self) -> Option<&str> {
+				        self.certificate.as_deref()
+				    }
+				  
+				    pub fn set_issued_at(&mut self, issued_at: DateTime<Utc>) {
+				        self.issued_at = Some(issued_at);
+				    }
+				  
+				    pub fn set_expires_at(&mut self, expires_at: DateTime<Utc>) {
+				        self.expires_at = Some(expires_at);
+				    }
+				  
+				    pub fn reset_certificate(&mut self) {
+				        self.certificate = None;
+				        self.issued_at = None;
+				        self.expires_at = None;
+				    }
+				  }
+				  ```
+				  
+				  ---
+		- *End of Day 2. Tomorrow: Error Handling as a Discipline — we deepen our error taxonomy and learn to write error messages worthy of a payment security auditor.*
