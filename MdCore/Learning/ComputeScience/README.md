@@ -1,32 +1,7 @@
 ## Compute Science Contents
 
-- [Meta & Learning](./meta.md)
-- [Mathematical Foundations](./math.md)
-- [Theory of Computation](./toc.md)
-- [Data Structures](./ds.md)
-- [Algorithms](./algorithms.md)
-- Programming Fundamentals
-- Programming Paradigms
-- Compilers & Interpreters
-- Computer Architecture
-- Operating Systems
-- Concurrency & Parallelism
-- Networking
-- Distributed Systems
-- Databases
-- Software Engineering
-- Security & Cryptography
-- Offensive Security & Pentesting
-- Data Science
-- Graphics & Signal Processing
-- Fintech & Payments
-- Blockchain & Web3
-- Cloud & Edge Computing
-- Quantum Computing
-- Game Theory & Operations Research
-- Bioinformatics & Computational Biology
-- Robotics & Autonomous Systems
-- Embedded & Real-Time Systems
-- Advanced & Cross-Cutting Topics
-- Miscellaneous
-- Professional Practice
+- [CoreCSE](./CoreCSE/README.md)
+- [DevStack](./DevStack/README.md)
+- [Data Science](./DataScience/README.md)
+- [Embedded Systems](./EmbeddedSystems/README.md)
+- [FinTech](./Fintech/README.md)

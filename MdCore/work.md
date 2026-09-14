@@ -1,17 +1,8 @@
-# Archive Timeline
-
-## Birth
-
-- 1994 @ Pokhara, Nepal
 
 ## Academics
 
-**Pre-School** [Nursery, LKG, UKG ] (1997 - 2000)
-
-**School** [I - X] (2001 - 2010)
-
-**High-School** (2010 - 2012)
-  - XI 
+**High-School**
+  - XI
       - Physics
       - Chemistry
       - Biology
@@ -23,7 +14,7 @@
       - English
       - Nepali
 
-**Bachelors** (2012 - 2016)
+**Bachelors**
   - I
       - Engineering Physics
       - Energy, Environment, Ecology and Society
@@ -70,7 +61,7 @@
       - Network Management
       - Wireless Networks
 
-**Masters-incompete** (2018 - 2024)
+**Masters-incompete**
 - Academic Studies
 - JavaScript
 - Business Process Management System
@@ -87,7 +78,7 @@
 - Privacy and Data Protection
 - Cloud Computing and Security
 
-**OpenCampus.sh** (2021 - 2022)
+**OpenCampus.sh**
 - Deep Learning
 - Advanced Deep Learning
 
@@ -107,9 +98,26 @@
 - VestiFi (Python Developer - Data Analytics, Visualization, and Reporting ) @2022
 - FuE-ZentrumKiel (Data ETL - 3D Lidar data processing) @2022
 - CloudFluid (Software Developer | Simulation API-Server ) @2023
+  - API-Server Architecture
+    - APIServer
+      - Client: User management
+      - Jobs: Service management
+        - GCP Services
+      - Local Cloud: Local Cloud Computing
+      - Monitoring
+      - Support
+    - Serverless
+      - AWS Services
+        - Simple Message Queue Service
+        - Simple Storage Service
+        - Lambda Compute Service
+    - Client
 - FfE ( Data Science Researcher | Reinforcement Learning in HEMS | Energy Consumption Optimization) @2024
 
 **Current**
 
 - imark ( Payment Applications Developer | Embedded C and Rust ) @[2025 - Current]
 
+**Future**
+  - S/W Dev. & Engineering.
+  - ML Dev., Engineering & Operations.
