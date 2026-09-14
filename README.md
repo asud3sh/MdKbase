@@ -1,1 +1,1 @@
-- [*](core.md)
+- [*](./MdCore/core.md)
