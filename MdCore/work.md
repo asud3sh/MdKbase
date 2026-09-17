@@ -1,123 +1,40 @@
+# Work Timeline
 
-## Academics
+**2017**
 
-**High-School**
-  - XI
-      - Physics
-      - Chemistry
-      - Biology
-      - Mathematics
-  - XII
-      - Physics
-      - Chemistry
-      - Mathematics
-      - English
-      - Nepali
+- 🐍 **BI Solutions** — Python Odoo Developer
 
-**Bachelors**
-  - I
-      - Engineering Physics
-      - Energy, Environment, Ecology and Society
-      - Basic Mechanical Engineering
-      - Basic Civil Engineering and Engineering Mechanics
-      - Basic Computer Engineering
-      - Linguistics
-  - II
-      - Engineering Chemistry
-      - Engineering Mathematics - I
-      - Basic Electrical and Electronics Engineering
-      - Engineering Graphics
-      - Workshops : Welding, Mudcraft, Woodcraft, Metalcraft
-  - III
-      - Engineering Mathematics - II
-      - Discrete Structures
-      - Digital Circuit and System
-      - Electronics Devices and Circuits
-      - Data Structures
-  - IV
-      - Engineering Mathematics - III
-      - Computer System Organization
-      - Object oriented technology
-      - Analysis and Design of Algorithms
-      - Analog and Digital Communication
-  - V
-      - Data Communication
-      - Operating Systems
-      - Database management System
-      - Computer Graphics and multimedia
-  - VI
-      - Micro Processor and Interfacing
-      - Software Engineering and Project Management
-      - Computer Networking
-  - VII
-      - Compiler Design
-      - Distributed System
-      - Cloud Computing
-      - Information Storage and Management
-      - Network and Web Security
-  - VIII
-      - Soft Computing
-      - Web Engineering
-      - Network Management
-      - Wireless Networks
+**2018**
 
-**Masters-incompete**
-- Academic Studies
-- JavaScript
-- Business Process Management System
-- Requirement Engineering
-- Data Quality Management
-- Advanced IT Project Management
-- Automatic Speech Processing
-- Business Analytics
-- Entrepreneurship and Entrapreneurship
-- Machine Learning
-- Neural Networks and Deep Learning
-- IT-Security
-- Network Systems and Security
-- Privacy and Data Protection
-- Cloud Computing and Security
+- 🚢 **Staff1 Cruise Ship** — Werkstudentent Provision / Housekeeping
 
-**OpenCampus.sh**
-- Deep Learning
-- Advanced Deep Learning
+**2019**
 
+- 🍲 **SantaFe** — Werkstudentent Assistant Cook
 
-## Work
+**2020**
 
-**Bygones**
+- 🐋 **Moby Fish Bar** — Teilzeit Sommer | Service /BAR / Kitchen
+- 🍷 **Baltic Catering** — Teilzeit Event Organization
 
-- BI Solutions @2017 (Python Odoo Developer)
-- Offline | Physical Works [2018 - 2021]
-  - Staff1 Cruise Ship (Provision/ Housekeeping) 🚢 @ 2018
-  - SantaFe Kitchen Assist. @ 2019
-  - Moby Fish Bar 🐋 @ 2020
-  - Baltic Catering (Event Organization) 🍷@ 2020
-  - Campus Suite (Cafe and Bakery) 🥯 @ 2021
-- Rokin GmbH (NLP Developer) @2021
-- VestiFi (Python Developer - Data Analytics, Visualization, and Reporting ) @2022
-- FuE-ZentrumKiel (Data ETL - 3D Lidar data processing) @2022
-- CloudFluid (Software Developer | Simulation API-Server ) @2023
-  - API-Server Architecture
-    - APIServer
-      - Client: User management
-      - Jobs: Service management
-        - GCP Services
-      - Local Cloud: Local Cloud Computing
-      - Monitoring
-      - Support
-    - Serverless
-      - AWS Services
-        - Simple Message Queue Service
-        - Simple Storage Service
-        - Lambda Compute Service
-    - Client
-- FfE ( Data Science Researcher | Reinforcement Learning in HEMS | Energy Consumption Optimization) @2024
+**2021**
 
-**Current**
+- 🥯 **Campus Suite** — Werkstudent (Cafe and Bakery)
+- 🤖 **Rokin GmbH** — NLP Developer (Intern-Project Contract)
 
-- imark ( Payment Applications Developer | Embedded C and Rust ) @[2025 - Current]
+**2022**
 
-**Future**
-  - S/W Dev. & Engineering.
-  - ML Dev., Engineering & Operations.
+- 📊 **VestiFi GmbH** — Python Developer (Data Analytics, Visualization, and Reporting)
+- 📡 **FuE-Zentrum Kiel** — Data ETL (3D LiDAR Data Processing)
+
+**2023**
+
+- ⚙️ **CloudFluid GmbH** — Software Developer (Simulation API Server)
+
+**2024**
+
+- ⚡ **FfE e.V.** — Data Science Researcher (Reinforcement Learning in HEMS | Energy Consumption Optimization)
+
+**2025 – Present**
+
+- 💳 **imark Pvt. Ltd.** — Payment Applications Developer (Embedded C and Rust)
