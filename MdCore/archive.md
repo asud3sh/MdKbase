@@ -86,8 +86,11 @@
 - Network Systems and Security
 - Privacy and Data Protection
 - Cloud Computing and Security
+- **Master Project:** `Exploration of Art Generation using Deep Generative models (GANs).` ( *🎨 Series of progressive exploration and experimentation of Deep Generative Models on subset of WikiArt dataset to produce Realistic art Images.* ) [[Code and Docs](https://github.com/asud3sh/GAN-ArtGeneration)]
+- **Master Thesis:** `Training Prosumer Agents with Reinforcement Learning for Energy and Cost Optimization` (*⚡ Reinforcement Learning Prosumer Agent to Optimize Household energy/cost with BEV Scenario* ) [[Code and Docs](https://github.com/asud3sh/Bidirectional-EV-ProsumerRLAgent)]
 
 **OpenCampus.sh** (2021 - 2022)
+- Fintech Blockchain [[Concept Demo](https://github.com/asud3sh/Blockchain)]
 - Deep Learning
 - Advanced Deep Learning
 
@@ -96,20 +99,20 @@
 
 **Bygones**
 
-- BI Solutions @2017 (Python Odoo Developer)
+- BI Solutions @2017 (**Python Odoo Developer**)
 - Offline | Physical Works [2018 - 2021]
   - Staff1 Cruise Ship (Provision/ Housekeeping) 🚢 @ 2018
   - SantaFe Kitchen Assist. @ 2019
   - Moby Fish Bar 🐋 @ 2020
   - Baltic Catering (Event Organization) 🍷@ 2020
   - Campus Suite (Cafe and Bakery) 🥯 @ 2021
-- Rokin GmbH (NLP Developer) @2021
-- VestiFi (Python Developer - Data Analytics, Visualization, and Reporting ) @2022
-- FuE-ZentrumKiel (Data ETL - 3D Lidar data processing) @2022
-- CloudFluid (Software Developer | Simulation API-Server ) @2023
-- FfE ( Data Science Researcher | Reinforcement Learning in HEMS | Energy Consumption Optimization) @2024
+- Rokin GmbH (**NLP Developer**) @2021
+- VestiFi GmbH (**Python Developer** - Data Analytics, Visualization, and Reporting ) @2022
+- FuE-ZentrumKiel (**Data ETL** - 3D Lidar data processing) @2022
+- CloudFluid GmbH (**Software Developer** | Simulation API-Server ) @2023
+- FfE e.V. ( **Data Science Researcher** | Reinforcement Learning in HEMS | Energy Consumption Optimization) @2024
 
 **Current**
 
-- imark ( Payment Applications Developer | Embedded C and Rust ) @[2025 - Current]
+- imark ( **Payment Applications Developer** | Embedded C and Rust ) @[2025 - Current]
 
