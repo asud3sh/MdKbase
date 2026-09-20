@@ -86,6 +86,7 @@
 - Network Systems and Security
 - Privacy and Data Protection
 - Cloud Computing and Security
+- Deutsch als Fremdsprache (DaF - B1)
 - **Master Project:** `Exploration of Art Generation using Deep Generative models (GANs).` ( *🎨 Series of progressive exploration and experimentation of Deep Generative Models on subset of WikiArt dataset to produce Realistic art Images.* ) [[Code and Docs](https://github.com/asud3sh/GAN-ArtGeneration)]
 - **Master Thesis:** `Training Prosumer Agents with Reinforcement Learning for Energy and Cost Optimization` (*⚡ Reinforcement Learning Prosumer Agent to Optimize Household energy/cost with BEV Scenario* ) [[Code and Docs](https://github.com/asud3sh/Bidirectional-EV-ProsumerRLAgent)]
 
