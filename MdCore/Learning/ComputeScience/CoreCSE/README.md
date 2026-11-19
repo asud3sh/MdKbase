@@ -1,32 +1,32 @@
 # Core Computer Science & Engineering
 
-- [Meta & Learning](./meta.md)
+- [Meta &amp; Learning](./meta.md)
 - [Mathematical Foundations](./math.md)
 - [Theory of Computation](./toc.md)
-- [Data Structures](./ds.md)
+- [Data Structures](./datastructures.md)
 - [Algorithms](./algorithms.md)
-- Programming Fundamentals
-- Programming Paradigms
-- Compilers & Interpreters
-- Computer Architecture
-- Operating Systems
-- Concurrency & Parallelism
-- Networking
-- Distributed Systems
-- Databases
-- Software Engineering
-- Security & Cryptography
-- Offensive Security & Pentesting
-- Data Science
-- Graphics & Signal Processing
-- Fintech & Payments
-- Blockchain & Web3
-- Cloud & Edge Computing
-- Quantum Computing
-- Game Theory & Operations Research
-- Bioinformatics & Computational Biology
-- Robotics & Autonomous Systems
-- Embedded & Real-Time Systems
-- Advanced & Cross-Cutting Topics
-- Miscellaneous
-- Professional Practice
+- [Programming Fundamentals](./pfundamentals.md)
+- [Programming Paradigms](./pparadigms.md)
+- [Compilers &amp; Interpreters](./compileandinterpret.md)
+- [Computer Architecture](./carchitecture.md)
+- [Operating Systems](./os.md)
+- [Concurrency &amp; Parallelism](./concurrencyandparallelism.md)
+- [Networking](./networking.md)
+- [Distributed Systems](./distributedsystems.md)
+- [Databases](./databases.md)
+- [Software Engineering](./softwareengineering.md)
+- [Security &amp; Cryptography](./secandcrypto.md)
+- [Offensive Security &amp; Pentesting](./offsecandpentest.md)
+- [Data Science](datascience.md)
+- [Graphics &amp; Signal Processing](graphicsandsignalprocessing.md)
+- [Fintech &amp; Payments](./fintech.md)
+- [Blockchain &amp; Web3](./blockchainandweb3.md)
+- [Cloud &amp; Edge Computing](./cloudandedgecompute.md)
+- [Quantum Computing](./quantumcomputing.md)
+- [Game Theory & Operations Research](./gametheory.md)
+- [Bioinformatics & Computational Biology](./bioinfomatics.md)
+- [Robotics & Autonomous Systems](./robotics.md)
+- [Embedded & Real-Time Systems](./embeddedsystem.md)
+- [Advanced & Cross-Cutting Topics](./advancedcctopics.md)
+- [Miscellaneous](./misc.md)
+- [Professional Practice](./professionalpractice.md)
